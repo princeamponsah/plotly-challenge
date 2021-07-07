@@ -18,6 +18,25 @@ function buildMetadata(sample) {
         var result = resultArray[0];
         // console.log("result, " ,result)
 
+        var wfreq = result.wfreq
+        // console.log("wash freq", wfreq)
+
+              // Guage for wash frequency
+        var traceGauge = {
+          domain: { x: [0, 1], y: [0, 1] },
+          value: wfreq,
+          title: { text: "Belly Button Wash Frequency <br> Scrubs per Week" },
+          type: "indicator",
+          mode: "gauge+number",
+          delta: { reference: 400 },
+          gauge: { axis: { range: [null, 9]}}
+        }
+
+        var data_gauge = [traceGauge];
+      
+        var layout_gauge = { width: 600, height: 400}
+        Plotly.newPlot('gauge',data_gauge,layout_gauge)
+
         // identify panel
         var panel = d3.select("#sample-metadata");
 
@@ -38,7 +57,7 @@ function buildMetadata(sample) {
 
 function buildCharts (sample) {
     d3.json("samples.json").then((data) => {
-        console.log("main data" ,data);
+        // console.log("main data" ,data);
 
         // parse data
 
@@ -51,14 +70,14 @@ function buildCharts (sample) {
         // console.log("resultsArray", resultArray);
 
         var result = resultArray[0];
-        console.log("result, " ,result)
+        // console.log("result, " ,result)
         
         var sampleValues = result.sample_values;
         var otu_ids = result.otu_ids;
         var otu_labels = result.otu_labels;
-        console.log("sampleValues, " ,sampleValues)
-        console.log("otu_ids, " ,otu_ids)
-        console.log("otu_labels, " ,otu_labels)
+        // console.log("sampleValues, " ,sampleValues)
+        // console.log("otu_ids, " ,otu_ids)
+        // console.log("otu_labels, " ,otu_labels)
 
 
         // BAR CHART CODE
@@ -73,9 +92,9 @@ function buildCharts (sample) {
             orientation: 'h'
         }
 
-        var data = [traceBar];
+        var data_bar = [traceBar];
 
-        var layout = {
+        var layout_bar = {
             title: "Top 10 Bacteria Cultures Found",
             margin: {
               l: 100,
@@ -85,7 +104,7 @@ function buildCharts (sample) {
             }
           };
 
-        Plotly.newPlot("bar", data, layout);
+        Plotly.newPlot("bar", data_bar, layout_bar);
 
 
         // BUBBLE CHART CODE
@@ -96,14 +115,15 @@ function buildCharts (sample) {
             mode: 'markers',
             marker: {
               color: otu_ids,
-              size: sampleValues
-            },
-            colorscale: 'Earth'
+              size: sampleValues,
+              colorscale: 'Earth'
+            }
+          
           };
 
-        var data = [traceBubble];
+        var data_bubble = [traceBubble];
 
-        var layout = {
+        var layout_bubble = {
             title: "Bacteria Cultures Per Sample",
             showlegend: false,
             height: 600,
@@ -112,17 +132,38 @@ function buildCharts (sample) {
             xaxis: { title: "OTU ID"}
           };
         
-          Plotly.newPlot("bubble", data, layout);
+          Plotly.newPlot("bubble", data_bubble, layout_bubble);
 
     });
 }
 
 // Drop down filter
 
+
 // initialize dashboard with init function
 function init() {
-    buildMetadata(941);
-    buildCharts(940);
+
+  var pullDownMenu = d3.select('#selDataset');
+
+  d3.json("samples.json").then((data) => {
+    // console.log("main data #2" ,data.names);
+
+    var names = data.names
+
+    names.forEach((sample) => {
+      pullDownMenu.append("option").property("value", sample).text(sample);
+
+    })
+
+  });
+
+  buildMetadata(940);
+  buildCharts(940);
+}
+
+function optionChanged(sample_cycle) {
+  buildMetadata(sample_cycle);
+  buildCharts(sample_cycle);
 }
 
 init()
